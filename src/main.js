@@ -24,7 +24,8 @@ const getFiltersTemplate = () => {
   <section class="main__filter filter container">
     <input type="radio" id="filter__all" class="filter__input visually-hidden" name="filter" checked="">
     <label for="filter__all" class="filter__label">
-      All <span class="filter__all-count">1</span></label>
+      All <span class="filter__all-count">1</span>
+    </label>
     <input type="radio" id="filter__overdue" class="filter__input visually-hidden" name="filter" disabled="">
     <label for="filter__overdue" class="filter__label">Overdue <span class="filter__overdue-count">0</span></label>
     <input type="radio" id="filter__today" class="filter__input visually-hidden" name="filter" disabled="">
@@ -37,7 +38,7 @@ const getFiltersTemplate = () => {
     <label for="filter__tags" class="filter__label">Tags <span class="filter__tags-count">0</span></label>
     <input type="radio" id="filter__archive" class="filter__input visually-hidden" name="filter">
     <label for="filter__archive" class="filter__label">Archive <span class="filter__archive-count">115</span></label>
-   </section>`;
+  </section>`;
 };
 
 const getBoardContainer = () => {
@@ -350,14 +351,10 @@ const getTaskFormTemplate = () => {
 const getLoadButton = () => `<button class="load-more" type="button">load more</button>`;
 
 
-const renderComponent = (container, component, repeat = false, placement = `beforeend`) => {
-  if (repeat) {
-    for (let i = 0; i < repeat; i++) {
-      container.insertAdjacentHTML(placement, component);
-    }
-  } else {
-    container.insertAdjacentHTML(placement, component);
-  }
+const renderComponent = (container, component, repeat = 1, placement = `beforeend`) => {
+  // Array(10) - это пустой массив из 10 элементов. но он совсем пустой, у него в этих элементах нет даже undefined.
+  // А вот Array.from(Array(10)) - это будет уже массив из десяти undefined. и по нему можно итерироваться
+  Array.from(Array(repeat)).map((_, n) => container.insertAdjacentHTML(placement, component));
 };
 
 
