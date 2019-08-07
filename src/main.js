@@ -352,9 +352,9 @@ const getLoadButton = () => `<button class="load-more" type="button">load more</
 
 
 const renderComponent = (container, component, repeat = 1, placement = `beforeend`) => {
-  // Array(10) - это пустой массив из 10 элементов. но он совсем пустой, у него в этих элементах нет даже undefined.
-  // А вот Array.from(Array(10)) - это будет уже массив из десяти undefined. и по нему можно итерироваться
-  Array.from(Array(repeat)).map((_, n) => container.insertAdjacentHTML(placement, component));
+  for (let i = 0; i < repeat; i++) {
+    container.insertAdjacentHTML(placement, component);
+  }
 };
 
 
