@@ -8,6 +8,7 @@ import {form as getTaskFormTemplate} from '../src/components/task-form.js';
 import {button as getLoadButton} from '../src/components/load-button.js';
 
 import {tasksList, filtersList} from '../src/data.js';
+const tasksArr = tasksList.slice();
 
 const renderComponent = (container, component, repeat = 1, placement = `beforeend`) => {
   for (let i = 0; i < repeat; i++) {
@@ -50,16 +51,16 @@ renderComponent(mainContainer, getBoardContainer());
 const boardContainer = mainContainer.querySelector(`.board`);
 const tasksContainer = mainContainer.querySelector(`.board__tasks`);
 
-renderEditTask(tasksContainer, tasksList, getTaskFormTemplate);
-renderTask(tasksContainer, tasksList, getTaskTamplate);
+renderEditTask(tasksContainer, tasksArr, getTaskFormTemplate);
+renderTask(tasksContainer, tasksArr, getTaskTamplate);
 renderComponent(boardContainer, getLoadButton());
 
 const loadMore = boardContainer.querySelector(`.load-more`);
 loadMore.addEventListener(`click`, () => {
-  if (tasksList.length > 0) {
-    renderMoreTask(tasksContainer, tasksList, getTaskTamplate);
+  if (tasksArr.length > 0) {
+    renderMoreTask(tasksContainer, tasksArr, getTaskTamplate);
   }
-  if (tasksList.length < 1) {
+  if (tasksArr.length < 1) {
     loadMore.style.display = `none`;
   }
 });
