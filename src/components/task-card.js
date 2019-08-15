@@ -1,6 +1,6 @@
-const getTaskCardTemplate = () => {
+const getTaskCardTemplate = ({description, dueDate, repeatingDays, tags, color}) => {
   return `
-  <article class="card card--blue">
+  <article class="card card--${color} ${Object.keys(repeatingDays).some((day) => repeatingDays[day]) ? `card--repeat` : ``}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
@@ -25,7 +25,7 @@ const getTaskCardTemplate = () => {
         </div>
 
         <div class="card__textarea-wrap">
-          <p class="card__text">Example default task with custom color.</p>
+          <p class="card__text">${description}</p>
         </div>
 
         <div class="card__settings">
@@ -33,31 +33,20 @@ const getTaskCardTemplate = () => {
             <div class="card__dates">
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">23 September</span>
-                  <span class="card__time">11:15 PM</span>
+                  <span class="card__date">${new Date(dueDate).toDateString()}</span>
+                  <!--span class="card__time">11:15 PM</span-->
                 </p>
               </div>
             </div>
 
             <div class="card__hashtag">
               <div class="card__hashtag-list">
-                <span class="card__hashtag-inner">
+                ${Array.from(tags).map((tag) => `<span class="card__hashtag-inner">
                   <span class="card__hashtag-name">
-                    #todo
+                    #${tag}
                   </span>
-                </span>
+                </span>`).join(``)}
 
-                <span class="card__hashtag-inner">
-                  <span class="card__hashtag-name">
-                    #personal
-                  </span>
-                </span>
-
-                <span class="card__hashtag-inner">
-                  <span class="card__hashtag-name">
-                    #important
-                  </span>
-                </span>
               </div>
             </div>
           </div>
