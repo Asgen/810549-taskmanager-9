@@ -74,7 +74,13 @@ render(mainContainer, new Board().getElement(), Position.BEFOREEND);
 const boardContainer = mainContainer.querySelector(`.board`);
 const tasksContainer = mainContainer.querySelector(`.board__tasks`);
 render(boardContainer, new ButtonLoadMore().getElement(), Position.BEFOREEND);
-renderTasks(tasksArr);
+
+
+if (tasksList.length < 1 || !(tasksList.some((day) => day.isArchive === true))) {
+  tasksContainer.innerText = `CONGRATULATIONS, ALL TASKS WERE COMPLETED! TO CREATE A NEW CLICK ON «ADD NEW TASK» BUTTON.`;
+} else {
+  renderTasks(tasksArr);
+}
 
 const loadMore = boardContainer.querySelector(`.load-more`);
 loadMore.addEventListener(`click`, () => {
