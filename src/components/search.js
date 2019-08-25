@@ -1,17 +1,6 @@
-import {createElement} from '../utils.js';
+import AbstractComponent from '../components/abstract-component.js';
 
-export default class Search {
-  constructor() {
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
+export default class Search extends AbstractComponent {
 
   getTemplate() {
     return `<section class="main__search search container">
