@@ -1,4 +1,4 @@
-import {render, Position} from '../utils.js';
+import {render, unrender, Position} from '../utils.js';
 import Board from '../components/board.js';
 import Sort from '../components/sort.js';
 import TasksContainer from '../components/tasks-container.js';
@@ -14,76 +14,116 @@ export default class BoardController {
     this._sort = new Sort();
     this._tasksContainer = new TasksContainer();
     this._loadMoreBtn = new ButtonLoadMore();
+    this._unrenderedTasks = 0;
   }
 
   init() {
+
     const tasksArr = this._tasks.slice();
 
     render(this._container, this._board.getElement(), Position.BEFOREEND);
-    const boardContainer = this._container.querySelector(`.board`);
-    render(boardContainer, this._tasksContainer.getElement(), Position.BEFOREEND);
-    const tasksContainer = boardContainer.querySelector(`.board__tasks`);
-
-    const renderTask = (taskMock) => {
-      const task = new TaskCard(taskMock);
-      const taskEdit = new TaskEdit(taskMock);
-
-      const onEscKeyDown = (evt) => {
-        if (evt.key === `Escape` || evt.key === `Esc`) {
-          tasksContainer.replaceChild(task.getElement(), taskEdit.getElement());
-        }
-      };
-
-      task.getElement()
-        .querySelector(`.card__btn--edit`)
-        .addEventListener(`click`, () => {
-          tasksContainer.replaceChild(taskEdit.getElement(), task.getElement());
-          document.addEventListener(`keydown`, onEscKeyDown);
-        });
-
-      taskEdit.getElement()
-        .querySelector(`textarea`)
-        .addEventListener(`focus`, () => {
-          document.removeEventListener(`keydown`, onEscKeyDown);
-        });
-
-      taskEdit.getElement().querySelector(`textarea`)
-        .addEventListener(`blur`, () => {
-          document.addEventListener(`keydown`, onEscKeyDown);
-        });
-
-      taskEdit.getElement()
-        .querySelector(`.card__save`)
-        .addEventListener(`click`, () => {
-          tasksContainer.replaceChild(task.getElement(), taskEdit.getElement());
-          document.removeEventListener(`keydown`, onEscKeyDown);
-        });
-
-      render(tasksContainer, task.getElement(), Position.BEFOREEND);
-    };
-
-    const renderTasks = (tasks) => {
-      tasks.splice(0, 8).forEach((taskMock) => renderTask(taskMock));
-    };
+    render(this._board.getElement(), this._tasksContainer.getElement(), Position.BEFOREEND);
 
     if (this._tasks.length < 1 || !(this._tasks.some((day) => day.isArchive === true))) {
-      tasksContainer.innerText = `CONGRATULATIONS, ALL TASKS WERE COMPLETED! TO CREATE A NEW CLICK ON «ADD NEW TASK» BUTTON.`;
+      this._tasksContainer.getElement().innerText = `CONGRATULATIONS, ALL TASKS WERE COMPLETED! TO CREATE A NEW CLICK ON «ADD NEW TASK» BUTTON.`;
     } else {
-      renderTasks(tasksArr);
+      render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
+      this._renderTasks(tasksArr);
+      this._sort.getElement().addEventListener(`click`, (evt) => this._onSorting(evt));
     }
 
     if (tasksArr.length > 0) {
-      render(tasksContainer, this._loadMoreBtn.getElement(), Position.BEFOREEND);
-      const loadMore = tasksContainer.querySelector(`.load-more`);
+      render(this._tasksContainer.getElement(), this._loadMoreBtn.getElement(), Position.BEFOREEND);
+    }
 
-      loadMore.addEventListener(`click`, () => {
-        if (tasksArr.length > 0) {
-          renderTasks(tasksArr);
-        }
-        if (tasksArr.length < 1) {
-          loadMore.style.display = `none`;
-        }
+    this._unrenderedTasks = tasksArr;
+    this._loadMoreBtn.getElement().addEventListener(`click`, () => {
+      if (this._unrenderedTasks.length > 0) {
+        this._renderTasks(this._unrenderedTasks);
+      }
+      if (this._unrenderedTasks.length < 1) {
+        unrender(this._loadMoreBtn.getElement());
+      }
+    });
+  }
+
+  _renderTask(taskMock) {
+    const task = new TaskCard(taskMock);
+    const taskEdit = new TaskEdit(taskMock);
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === `Escape` || evt.key === `Esc`) {
+        this._tasksContainer.getElement().replaceChild(task.getElement(), taskEdit.getElement());
+      }
+    };
+
+    task.getElement()
+      .querySelector(`.card__btn--edit`)
+      .addEventListener(`click`, () => {
+        this._tasksContainer.getElement().replaceChild(taskEdit.getElement(), task.getElement());
+        document.addEventListener(`keydown`, onEscKeyDown);
       });
+
+    taskEdit.getElement()
+      .querySelector(`textarea`)
+      .addEventListener(`focus`, () => {
+        document.removeEventListener(`keydown`, onEscKeyDown);
+      });
+
+    taskEdit.getElement().querySelector(`textarea`)
+      .addEventListener(`blur`, () => {
+        document.addEventListener(`keydown`, onEscKeyDown);
+      });
+
+    taskEdit.getElement()
+      .querySelector(`.card__save`)
+      .addEventListener(`click`, () => {
+        this._tasksContainer.getElement().replaceChild(task.getElement(), taskEdit.getElement());
+        document.removeEventListener(`keydown`, onEscKeyDown);
+      });
+
+    render(this._tasksContainer.getElement(), task.getElement(), Position.BEFOREEND);
+  }
+
+  _renderTasks(tasks) {
+    tasks.splice(0, 8).forEach((taskMock) => this._renderTask(taskMock));
+  }
+
+  _renderLoadMoreBtn(list) {
+    if (list.length > 0) {
+      render(this._tasksContainer.getElement(), this._loadMoreBtn.getElement(), Position.BEFOREEND);
+    }
+  }
+
+  _onSorting(e) {
+    e.preventDefault();
+
+    if (e.target.tagName !== `A`) {
+      return;
+    }
+
+    this._tasksContainer.getElement().innerHTML = ``;
+
+    switch (e.target.dataset.sortType) {
+      case `date-up`:
+        const sortedByDateUpTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        this._renderTasks(sortedByDateUpTasks);
+        this._unrenderedTasks = sortedByDateUpTasks;
+        this._renderLoadMoreBtn(sortedByDateUpTasks);
+
+        break;
+      case `date-down`:
+        const sortedByDateDownTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        this._renderTasks(sortedByDateDownTasks);
+        this._unrenderedTasks = sortedByDateDownTasks;
+        this._renderLoadMoreBtn(sortedByDateDownTasks);
+        break;
+      case `default`:
+        const sortedByDefaultTasks = this._tasks.slice();
+        this._renderTasks(sortedByDefaultTasks);
+        this._unrenderedTasks = sortedByDefaultTasks;
+        this._renderLoadMoreBtn(sortedByDefaultTasks);
+        break;
     }
   }
 }
