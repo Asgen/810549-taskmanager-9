@@ -14,29 +14,37 @@ export default class BoardController {
     this._sort = new Sort();
     this._tasksContainer = new TasksContainer();
     this._loadMoreBtn = new ButtonLoadMore();
+    this._unrenderedTasks = 0;
   }
 
   init() {
+
     const tasksArr = this._tasks.slice();
 
     render(this._container, this._board.getElement(), Position.BEFOREEND);
     render(this._board.getElement(), this._tasksContainer.getElement(), Position.BEFOREEND);
-    const tasksContainer = this._board.getElement().querySelector(`.board__tasks`);
-
-    /*const renderTasks = (tasks) => {
-      tasks.splice(0, 8).forEach((taskMock) => this._renderTask(taskMock));
-    };*/
 
     if (this._tasks.length < 1 || !(this._tasks.some((day) => day.isArchive === true))) {
-      tasksContainer.innerText = `CONGRATULATIONS, ALL TASKS WERE COMPLETED! TO CREATE A NEW CLICK ON «ADD NEW TASK» BUTTON.`;
+      this._tasksContainer.getElement().innerText = `CONGRATULATIONS, ALL TASKS WERE COMPLETED! TO CREATE A NEW CLICK ON «ADD NEW TASK» BUTTON.`;
     } else {
       render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
       this._renderTasks(tasksArr);
-
       this._sort.getElement().addEventListener(`click`, (evt) => this._onSorting(evt));
     }
 
-    this._loadMore(tasksArr);
+    if (tasksArr.length > 0) {
+      render(this._tasksContainer.getElement(), this._loadMoreBtn.getElement(), Position.BEFOREEND);
+    }
+
+    this._unrenderedTasks = tasksArr;
+    this._loadMoreBtn.getElement().addEventListener(`click`, () => {
+      if (this._unrenderedTasks.length > 0) {
+        this._renderTasks(this._unrenderedTasks);
+      }
+      if (this._unrenderedTasks.length < 1) {
+        unrender(this._loadMoreBtn.getElement());
+      }
+    });
   }
 
   _renderTask(taskMock) {
@@ -81,29 +89,13 @@ export default class BoardController {
     tasks.splice(0, 8).forEach((taskMock) => this._renderTask(taskMock));
   }
 
-  _loadMore(list) {
-
-    const onLoadMoreBtnClick = () => {
-      if (list.length > 0) {
-        this._renderTasks(list);
-      }
-
-      if (list.length < 1) {
-        unrender(this._loadMoreBtn.getElement());
-      }      
-    };
-    this._loadMoreBtn.getElement().removeEventListener(`click`, onLoadMoreBtnClick);
-
+  _renderLoadMoreBtn(list) {
     if (list.length > 0) {
-      const tasksContainer = this._board.getElement().querySelector(`.board__tasks`);
-      render(tasksContainer, this._loadMoreBtn.getElement(), Position.BEFOREEND);
-
-      this._loadMoreBtn.getElement().addEventListener(`click`, onLoadMoreBtnClick);
+      render(this._tasksContainer.getElement(), this._loadMoreBtn.getElement(), Position.BEFOREEND);
     }
   }
 
   _onSorting(e) {
-
     e.preventDefault();
 
     if (e.target.tagName !== `A`) {
@@ -115,22 +107,22 @@ export default class BoardController {
     switch (e.target.dataset.sortType) {
       case `date-up`:
         const sortedByDateUpTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
-
-        //sortedByDateUpTasks.forEach((taskMock) => this._renderTask(taskMock));
         this._renderTasks(sortedByDateUpTasks);
-        console.log(sortedByDateUpTasks);
-        this._loadMore(sortedByDateUpTasks);
+        this._unrenderedTasks = sortedByDateUpTasks;
+        this._renderLoadMoreBtn(sortedByDateUpTasks);
 
         break;
       case `date-down`:
         const sortedByDateDownTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
-        sortedByDateDownTasks.forEach((taskMock) => this._renderTask(taskMock));
+        this._renderTasks(sortedByDateDownTasks);
+        this._unrenderedTasks = sortedByDateDownTasks;
+        this._renderLoadMoreBtn(sortedByDateDownTasks);
         break;
       case `default`:
         const sortedByDefaultTasks = this._tasks.slice();
         this._renderTasks(sortedByDefaultTasks);
-        this._loadMore(sortedByDefaultTasks);
-        //this._tasks.forEach((taskMock) => this._renderTask(taskMock));
+        this._unrenderedTasks = sortedByDefaultTasks;
+        this._renderLoadMoreBtn(sortedByDefaultTasks);
         break;
     }
   }
