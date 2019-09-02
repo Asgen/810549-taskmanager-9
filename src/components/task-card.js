@@ -1,7 +1,7 @@
 import AbstractComponent from '../components/abstract-component.js';
 
 export default class TaskCard extends AbstractComponent {
-  constructor({description, dueDate, repeatingDays, tags, color}) {
+  constructor({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) {
     super();
     this._description = description;
     this._dueDate = dueDate;
@@ -9,6 +9,8 @@ export default class TaskCard extends AbstractComponent {
     this._tags = tags;
     this._color = color;
     this._element = null;
+    this._favorite = isFavorite;
+    this._archive = isArchive;
   }
 
   getTemplate() {
@@ -19,12 +21,12 @@ export default class TaskCard extends AbstractComponent {
             <button type="button" class="card__btn card__btn--edit">
               edit
             </button>
-            <button type="button" class="card__btn card__btn--archive">
+            <button type="button" class="card__btn card__btn--archive ${this._archive ? `card__btn--disabled` : ``}">
               archive
             </button>
             <button
               type="button"
-              class="card__btn card__btn--favorites card__btn--disabled"
+              class="card__btn card__btn--favorites ${this._favorite ? `card__btn--disabled` : ``}"
             >
               favorites
             </button>
@@ -45,7 +47,7 @@ export default class TaskCard extends AbstractComponent {
               <div class="card__dates">
                 <div class="card__date-deadline">
                   <p class="card__input-deadline-wrap">
-                    <span class="card__date">${new Date(this._dueDate).toDateString()}</span>
+                    <span class="card__date">${this._dueDate ? new Date(this._dueDate).toDateString() : ``}</span>
                     <!--span class="card__time">11:15 PM</span-->
                   </p>
                 </div>
