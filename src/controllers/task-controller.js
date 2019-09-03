@@ -21,7 +21,10 @@ export default class TaskController {
   create() {
     flatpickr(this._taskEdit
       .getElement()
-      .querySelector(`.card__date`)
+      .querySelector(`.card__date`), {
+      defaultDate: `today`,
+      minDate: `today`,
+    }
     );
 
     const addToFavorite = this._taskEdit.getElement().querySelector(`.card__btn--favorites`);
@@ -63,7 +66,6 @@ export default class TaskController {
         evt.preventDefault();
 
         const formData = new FormData(this._taskEdit.getElement().querySelector(`.card__form`));
-
         const entry = {
           description: formData.get(`text`),
           color: formData.get(`color`),
@@ -84,6 +86,10 @@ export default class TaskController {
           isFavorite: addToFavorite.classList.contains(`card__btn--disabled`) ? true : false,
           isArchive: addToArchive.classList.contains(`card__btn--disabled`) ? true : false,
         };
+
+        if (dateStatus.innerText === `NO`) {
+          entry.dueDate = null;
+        }
 
         this._onDataChange(entry, this._data);
         document.removeEventListener(`keydown`, onEscKeyDown);

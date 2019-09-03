@@ -4,7 +4,7 @@ export default class TaskEdit extends AbstractComponent {
   constructor({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) {
     super();
     this._description = description;
-    this._dueDate = new Date(dueDate);
+    this._dueDate = dueDate !== null ? new Date(dueDate) : null;
     this._repeatingDays = repeatingDays;
     this._tags = tags;
     this._color = color;
@@ -126,17 +126,17 @@ export default class TaskEdit extends AbstractComponent {
             <div class="card__details">
               <div class="card__dates">
                 <button class="card__date-deadline-toggle" type="button">
-                  date: <span class="card__date-status">${this._isRepeat ? `NO` : `YES` }</span>
+                  date: <span class="card__date-status">${this._dueDate === null ? `NO` : `YES` }</span>
                 </button>
 
-                <fieldset class="card__date-deadline ${this._isRepeat ? `visually-hidden` : `` }">
+                <fieldset class="card__date-deadline ${this._isRepeat || this._dueDate === null ? `visually-hidden` : `` }">
                   <label class="card__input-deadline-wrap">
                     <input
                       class="card__date"
                       type="text"
                       placeholder=""
                       name="date"
-                      value="${this._dueDate.toDateString()} ${this._dueDate.getHours()}:${this._dueDate.getMinutes()}"
+                      value="${this._dueDate ? this._dueDate.toDateString() : ``} ${this._dueDate ? this._dueDate.getHours() : ``}:${this._dueDate ? this._dueDate.getMinutes() : ``}"
                     />
                   </label>
                 </fieldset>
@@ -242,7 +242,6 @@ export default class TaskEdit extends AbstractComponent {
                       <p class="card__hashtag-name">
                        #${tag}
                       </p>
-                    <button type="button" class="card__hashtag-name">#${tag}</button>
                     <button type="button" class="card__hashtag-delete">
                       delete
                     </button>
