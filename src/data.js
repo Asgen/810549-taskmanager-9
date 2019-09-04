@@ -1,4 +1,4 @@
-const AMOUNT_OF_TASKS = 12;
+const AMOUNT_OF_TASKS = 15;
 
 const getTask = () => ({
   description: [
@@ -6,7 +6,10 @@ const getTask = () => ({
     `Find money for travel`,
     `Eat something`,
   ][Math.floor(Math.random() * 3)],
-  dueDate: Date.now() + 1 + Math.floor((Math.random() * 15) - 7) * 24 * 60 * 60 * 1000,
+  dueDate: [
+    `Sat Feb 29 2019 3:0`,
+    null,
+  ][Math.floor(Math.random() * 2)],
   tags: new Set([
     `cinema`,
     `entertainment`,

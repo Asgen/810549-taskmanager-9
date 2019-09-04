@@ -2,8 +2,8 @@ import {render, unrender, Position} from '../utils.js';
 import Board from '../components/board.js';
 import Sort from '../components/sort.js';
 import TasksContainer from '../components/tasks-container.js';
-import TaskCard from '../components/task-card.js';
-import TaskEdit from '../components/task-form.js';
+import TaskController from '../controllers/task-controller.js';
+
 import ButtonLoadMore from '../components/load-button.js';
 
 export default class BoardController {
@@ -15,6 +15,11 @@ export default class BoardController {
     this._tasksContainer = new TasksContainer();
     this._loadMoreBtn = new ButtonLoadMore();
     this._unrenderedTasks = 0;
+    this._sortedTasks = null;
+
+    this._subscriptions = [];
+    this._onChangeView = this._onChangeView.bind(this);
+    this._onDataChange = this._onDataChange.bind(this);
   }
 
   init() {
@@ -47,46 +52,44 @@ export default class BoardController {
     });
   }
 
-  _renderTask(taskMock) {
-    const task = new TaskCard(taskMock);
-    const taskEdit = new TaskEdit(taskMock);
+  _renderTasks(tasks) {
+    tasks.splice(0, 8).forEach((taskMock) => {
+      const taskController = new TaskController(this._tasksContainer, taskMock, this._onDataChange, this._onChangeView);
+      this._subscriptions.push(taskController.setDefaultView.bind(taskController));
+    });
 
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        this._tasksContainer.getElement().replaceChild(task.getElement(), taskEdit.getElement());
-      }
-    };
 
-    task.getElement()
-      .querySelector(`.card__btn--edit`)
-      .addEventListener(`click`, () => {
-        this._tasksContainer.getElement().replaceChild(taskEdit.getElement(), task.getElement());
-        document.addEventListener(`keydown`, onEscKeyDown);
-      });
-
-    taskEdit.getElement()
-      .querySelector(`textarea`)
-      .addEventListener(`focus`, () => {
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      });
-
-    taskEdit.getElement().querySelector(`textarea`)
-      .addEventListener(`blur`, () => {
-        document.addEventListener(`keydown`, onEscKeyDown);
-      });
-
-    taskEdit.getElement()
-      .querySelector(`.card__save`)
-      .addEventListener(`click`, () => {
-        this._tasksContainer.getElement().replaceChild(task.getElement(), taskEdit.getElement());
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      });
-
-    render(this._tasksContainer.getElement(), task.getElement(), Position.BEFOREEND);
+    this._unrenderedTasks = tasks;
+    this._renderLoadMoreBtn(this._unrenderedTasks);
   }
 
-  _renderTasks(tasks) {
-    tasks.splice(0, 8).forEach((taskMock) => this._renderTask(taskMock));
+  _onChangeView() {
+    this._subscriptions.forEach((it) => it());
+  }
+
+  _onDataChange(newData, oldData) {
+    let taskIndex = this._tasks.findIndex((it) => it === oldData);
+    this._tasks[taskIndex] = newData;
+
+    if (this._sortedTasks) {
+      taskIndex = this._sortedTasks.findIndex((it) => it === oldData);
+      this._sortedTasks[taskIndex] = newData;
+    }
+
+    unrender(this._tasksContainer.getElement());
+    this._tasksContainer.removeElement();
+
+    const thisTasks = this._sortedTasks ? this._sortedTasks.slice() : this._tasks.slice();
+    render(this._board.getElement(), this._tasksContainer.getElement(), Position.BEFOREEND);
+
+    if (taskIndex > 7) {
+      thisTasks.forEach((taskMock) => {
+        const taskController = new TaskController(this._tasksContainer, taskMock, this._onDataChange, this._onChangeView);
+        this._subscriptions.push(taskController.setDefaultView.bind(taskController));
+      });
+    } else {
+      this._renderTasks(thisTasks);
+    }
   }
 
   _renderLoadMoreBtn(list) {
@@ -106,23 +109,19 @@ export default class BoardController {
 
     switch (e.target.dataset.sortType) {
       case `date-up`:
-        const sortedByDateUpTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        this._sortedTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        const sortedByDateUpTasks = this._sortedTasks.slice();
         this._renderTasks(sortedByDateUpTasks);
-        this._unrenderedTasks = sortedByDateUpTasks;
-        this._renderLoadMoreBtn(sortedByDateUpTasks);
-
         break;
       case `date-down`:
-        const sortedByDateDownTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        this._sortedTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        const sortedByDateDownTasks = this._sortedTasks.slice();
         this._renderTasks(sortedByDateDownTasks);
-        this._unrenderedTasks = sortedByDateDownTasks;
-        this._renderLoadMoreBtn(sortedByDateDownTasks);
         break;
       case `default`:
+        this._sortedTasks = null;
         const sortedByDefaultTasks = this._tasks.slice();
         this._renderTasks(sortedByDefaultTasks);
-        this._unrenderedTasks = sortedByDefaultTasks;
-        this._renderLoadMoreBtn(sortedByDefaultTasks);
         break;
     }
   }
