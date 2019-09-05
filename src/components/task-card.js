@@ -1,3 +1,4 @@
+import moment from 'moment';
 import AbstractComponent from '../components/abstract-component.js';
 
 export default class TaskCard extends AbstractComponent {
@@ -47,7 +48,7 @@ export default class TaskCard extends AbstractComponent {
               <div class="card__dates">
                 <div class="card__date-deadline">
                   <p class="card__input-deadline-wrap">
-                    <span class="card__date">${this._dueDate ? new Date(this._dueDate).toDateString() : ``}</span>
+                    <span class="card__date">${this._dueDate ? moment(this._dueDate).format(`DD MMMM`) : ``}</span>
                     <!--span class="card__time">11:15 PM</span-->
                   </p>
                 </div>
