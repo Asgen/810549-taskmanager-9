@@ -1,4 +1,4 @@
-import {render, unrender, Position} from '../utils.js';
+import {render, Position} from '../utils.js';
 
 import TaskController, {Mode as TaskControllerMode} from '../controllers/task-controller.js';
 
@@ -11,7 +11,7 @@ export default class TaskListController {
     this._subscriptions = [];
     this._tasks = [];
 
-    //this._onChangeView = this._onChangeView.bind(this);
+    this._onChangeView = this._onChangeView.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
   }
 
@@ -38,7 +38,10 @@ export default class TaskListController {
       isArchive: false,
     };
 
-    this._creatingTask = new TaskController(this._container, defaultTask, TaskControllerMode.ADDING, this._onDataChange, this._onChangeView.bind(this));
+    this._creatingTask = new TaskController(this._container, defaultTask, TaskControllerMode.ADDING, this._onChangeView, (...args) => {
+      this._creatingTask = null;
+      this._onDataChange(...args);
+    });
   }
 
   setTasks(tasks) {
@@ -58,17 +61,6 @@ export default class TaskListController {
 
     const taskController = new TaskController(this._container, task, TaskControllerMode.DEFAULT, this._onChangeView, this._onDataChange);
     this._subscriptions.push(taskController.setDefaultView.bind(taskController));
-  }
-
-  _renderTasks(tasks) {
-    tasks.splice(0, 8).forEach((taskMock) => {
-      const taskController = new TaskController(this._container, taskMock, `default`, this._onDataChange, this._onChangeView);
-      this._subscriptions.push(taskController.setDefaultView.bind(taskController));
-    });
-
-
-    this._unrenderedTasks = tasks;
-    this._renderLoadMoreBtn(this._unrenderedTasks);
   }
 
   _onDataChange(newData, oldData) {
@@ -98,21 +90,6 @@ export default class TaskListController {
 
     this.setTasks(this._tasks);
     this._onDataChangeMain(this._tasks);
-
-    //unrender(this._container);
-    //this._container.removeElement();
-
-/*    const thisTasks = this._sortedTasks ? this._sortedTasks.slice() : this._tasks.slice();
-    render(this._board.getElement(), this._container, Position.BEFOREEND);
-
-    if (taskIndex > 7) {
-      thisTasks.forEach((taskMock) => {
-        const taskController = new TaskController(this._container, taskMock, this._onDataChange, this._onChangeView);
-        this._subscriptions.push(taskController.setDefaultView.bind(taskController));
-      });
-    } else {
-      this._renderTasks(thisTasks);
-    }*/
   }
 
   _onChangeView() {
@@ -124,5 +101,4 @@ export default class TaskListController {
       render(this._container, this._loadMoreBtn.getElement(), Position.BEFOREEND);
     }
   }
-
 }

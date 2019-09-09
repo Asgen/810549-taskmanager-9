@@ -15,7 +15,7 @@ const Mode = {
 export {Mode};
 
 export default class TaskController {
-  constructor(container, data, mode, onDataChange, onChangeView) {
+  constructor(container, data, mode, onChangeView, onDataChange) {
     this._container = container;
     this._data = data;
     this._taskView = new TaskCard(this._data);
@@ -64,8 +64,8 @@ export default class TaskController {
     this._taskView.getElement()
       .querySelector(`.card__btn--edit`)
       .addEventListener(`click`, (evt) => {
-        //evt.preventDefault();
-        this._onChangeView();
+        evt.preventDefault();
+        this._onChangeView(`yoyo`);
 
         this._container.replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
 
