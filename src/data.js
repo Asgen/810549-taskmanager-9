@@ -1,4 +1,4 @@
-const AMOUNT_OF_TASKS = 15;
+const AMOUNT_OF_TASKS = 18;
 
 const getTask = () => ({
   description: [

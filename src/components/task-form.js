@@ -10,7 +10,7 @@ export default class TaskEdit extends AbstractComponent {
     this._color = color;
     this._favorite = isFavorite;
     this._archive = isArchive;
-    this._isRepeat = Object.values(this._repeatingDays).some((it) => it === true) ? 1 : 0;
+    this._isRepeat = Object.values(this._repeatingDays).some((it) => it === true) && dueDate !== 1 ? 1 : 0;
 
     this._onDateClick();
     this._onRepeatClick();
@@ -126,7 +126,7 @@ export default class TaskEdit extends AbstractComponent {
             <div class="card__details">
               <div class="card__dates">
                 <button class="card__date-deadline-toggle" type="button">
-                  date: <span class="card__date-status">${this._dueDate === null ? `NO` : `YES` }</span>
+                  date: <span class="card__date-status">${this._dueDate === null || this._isRepeat ? `NO` : `YES` }</span>
                 </button>
 
                 <fieldset class="card__date-deadline ${this._isRepeat || this._dueDate === null ? `visually-hidden` : `` }">
