@@ -1,15 +1,19 @@
 const AMOUNT_OF_TASKS = 18;
 
 const getTask = () => ({
+  id: Math.floor(Math.random() * 50000),
   description: [
     `Prepare for the pitch`,
     `Find money for travel`,
     `Eat something`,
   ][Math.floor(Math.random() * 3)],
   dueDate: [
-    `Sat Feb 29 2019 3:0`,
+    new Date(`Fr Feb 2 2020 3:0`),
+    new Date(`Sat Feb 3 2020 3:0`),
+    new Date(`Mon Feb 4 2020 3:0`),
+    new Date(`Wed Feb 5 2020 3:0`),
     null,
-  ][Math.floor(Math.random() * 2)],
+  ][Math.floor(Math.random() * 5)],
   tags: new Set([
     `cinema`,
     `entertainment`,
@@ -36,7 +40,8 @@ const getTask = () => ({
   isArchive: Boolean(Math.round(Math.random())),
 });
 
-const tasksList = Array.from(Array(AMOUNT_OF_TASKS)).map(getTask);
+const tasksListRaw = Array.from(Array(AMOUNT_OF_TASKS)).map(getTask);
+const tasksList = tasksListRaw.slice().sort((a, b) => a.id - b.id);
 
 const filtersList = [
   {

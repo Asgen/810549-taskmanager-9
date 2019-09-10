@@ -34,7 +34,7 @@ export default class BoardController {
     this._sort.getElement().addEventListener(`click`, (evt) => this._onSorting(evt));
   }
 
-  _renderBoard() {
+  _renderBoard(index) {
     render(this._board.getElement(), this._tasksContainer.getElement(), Position.BEFOREEND);
     const tasksArr = this._sortedTasks ? this._sortedTasks : this._tasks.slice();
 
@@ -44,7 +44,11 @@ export default class BoardController {
       return;
     }
 
-    this._taskListController.setTasks(tasksArr.splice(0, 8));
+    if (index > 7) {
+      this._taskListController.setTasks(tasksArr.splice(0));
+    } else {
+      this._taskListController.setTasks(tasksArr.splice(0, 8));
+    }
 
     this._renderLoadMoreBtn(tasksArr);
 
@@ -84,11 +88,15 @@ export default class BoardController {
     this._taskListController.createTask();
   }
 
-  _onDataChange(tasks) {
+  _onDataChange(tasks, index) {
     // Переписываем видимую часть тасков
-    this._tasks = tasks;
+    if (this._sortedTasks) {
+      this._sortedTasks = tasks.concat(this._unrenderedTasks);
+    } else {
+      this._tasks = tasks.concat(this._unrenderedTasks);
+    }
 
-    this._renderBoard();
+    this._renderBoard(index);
   }
 
   _renderLoadMoreBtn(list) {
@@ -108,15 +116,17 @@ export default class BoardController {
 
     switch (e.target.dataset.sortType) {
       case `date-up`:
-        this._sortedTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        this._tasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
         this._renderBoard();
         break;
       case `date-down`:
-        this._sortedTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        this._tasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
         this._renderBoard();
         break;
       case `default`:
-        this._sortedTasks = null;
+
+        //this._sortedTasks = null;
+        this._tasks = this._tasks.slice().sort((a, b) => a.id - b.id);
         this._renderBoard();
         break;
     }

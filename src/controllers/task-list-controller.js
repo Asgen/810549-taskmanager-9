@@ -21,6 +21,7 @@ export default class TaskListController {
     }
 
     const defaultTask = {
+      id: Math.floor(Math.random() * 50000),
       description: `My new task`,
       color: `black`,
       tags: new Set(),
@@ -75,21 +76,7 @@ export default class TaskListController {
       this._tasks[taskIndex] = newData;
     }
 
-    // Обновление списка задач при сохранении/удалении задачи, когда выбрана сортировка.
-    if (this._sortedTasks) {
-      taskIndex = this._sortedTasks.findIndex((it) => it === oldData);
-      if (newData === null) {
-        this._sortedTasks.splice(taskIndex, 1);
-      } else if (oldData === null) {
-        this._creatingTask = null;
-        this._sortedTasks = [newData, ...this._sortedTasks];
-      } else {
-        this._sortedTasks[taskIndex] = newData;
-      }
-    }
-
-    this.setTasks(this._tasks);
-    this._onDataChangeMain(this._tasks);
+    this._onDataChangeMain(this._tasks, taskIndex);
   }
 
   _onChangeView() {

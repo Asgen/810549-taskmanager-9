@@ -5,7 +5,7 @@ export default class TaskCard extends AbstractComponent {
   constructor({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) {
     super();
     this._description = description;
-    this._dueDate = dueDate !== null ? new Date(dueDate) : null;
+    this._dueDate = dueDate !== null ? new Date(dueDate).getTime() : null;
     this._repeatingDays = repeatingDays;
     this._tags = tags;
     this._color = color;

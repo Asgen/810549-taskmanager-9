@@ -33,7 +33,7 @@ export default class TaskController {
     flatpickr(this._taskEdit
       .getElement()
       .querySelector(`.card__date`), {
-      defaultDate: `today`,
+      defaultDate: this._taskEdit._dueDate ? this._taskEdit._dueDate : `today`,
       minDate: `today`,
     }
     );
@@ -65,7 +65,7 @@ export default class TaskController {
       .querySelector(`.card__btn--edit`)
       .addEventListener(`click`, (evt) => {
         evt.preventDefault();
-        this._onChangeView(`yoyo`);
+        this._onChangeView();
 
         this._container.replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
 
@@ -90,6 +90,7 @@ export default class TaskController {
 
         const formData = new FormData(this._taskEdit.getElement().querySelector(`.card__form`));
         const entry = {
+          id: this._data.id,
           description: formData.get(`text`),
           color: formData.get(`color`),
           tags: new Set(formData.getAll(`hashtag`)),
