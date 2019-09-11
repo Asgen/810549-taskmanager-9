@@ -5,12 +5,11 @@ import TasksContainer from '../components/tasks-container.js';
 import TaskListController from '../controllers/task-list-controller.js';
 import ButtonLoadMore from '../components/load-button.js';
 
-const TASKS_IN_ROW = 8;
-
 export default class BoardController {
-  constructor(container) {
+  constructor(container, onDataChange) {
     this._container = container;
     this._tasks = [];
+    this._onDataChangeMain = onDataChange;
 
     this._board = new Board();
     this._sort = new Sort();
@@ -66,7 +65,6 @@ export default class BoardController {
 
   _setTasks(tasks) {
     this._tasks = tasks;
-    this._showedTasks = TASKS_IN_ROW;
 
     this._renderBoard();
   }
@@ -96,6 +94,7 @@ export default class BoardController {
       this._tasks = tasks.concat(this._unrenderedTasks);
     }
 
+    this._onDataChangeMain(this._tasks);
     this._renderBoard(index);
   }
 
@@ -124,8 +123,6 @@ export default class BoardController {
         this._renderBoard();
         break;
       case `default`:
-
-        //this._sortedTasks = null;
         this._tasks = this._tasks.slice().sort((a, b) => a.id - b.id);
         this._renderBoard();
         break;

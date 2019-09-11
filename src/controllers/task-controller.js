@@ -52,8 +52,8 @@ export default class TaskController {
     const onEscKeyDown = (evt) => {
       if (evt.key === `Escape` || evt.key === `Esc`) {
         if (mode === Mode.DEFAULT) {
-          if (this._container.getElement().contains(this._taskEdit.getElement())) {
-            this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+          if (this._container.contains(this._taskEdit.getElement())) {
+            this._container.replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
           }
         } else if (mode === Mode.ADDING) {
           this._container.removeChild(currentView.getElement());

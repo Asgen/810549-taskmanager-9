@@ -67,7 +67,10 @@ export default class TaskListController {
   _onDataChange(newData, oldData) {
     let taskIndex = this._tasks.findIndex((it) => it === oldData);
 
+    let deletedTaskId = null;
+
     if (newData === null) {
+      deletedTaskId = this._tasks[taskIndex].id;
       this._tasks.splice(taskIndex, 1);
     } else if (oldData === null) {
       this._creatingTask = null;
@@ -76,7 +79,7 @@ export default class TaskListController {
       this._tasks[taskIndex] = newData;
     }
 
-    this._onDataChangeMain(this._tasks, taskIndex);
+    this._onDataChangeMain(this._tasks, taskIndex, deletedTaskId);
   }
 
   _onChangeView() {
